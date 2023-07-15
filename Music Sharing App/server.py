@@ -4,6 +4,13 @@ import time
 import os
 
 
+#For FTP Server
+# Student Boilerlate Code Start
+#pip install pyftpdlib < this should be installed
+from pyftpdlib.authorizers import DummyAuthorizer
+from pyftpdlib.handlers import FTPHandler
+from pyftpdlib.servers import FTPServer
+# Student Boilerlate Code End
 
 
 IP_ADDRESS = '127.0.0.1'
@@ -12,7 +19,7 @@ SERVER = None
 BUFFER_SIZE = 4096
 clients = {}
 
-
+#Creating shared_files directory on server
 is_dir_exists = os.path.isdir('shared_files')
 print(is_dir_exists)
 if(not is_dir_exists):
@@ -58,13 +65,21 @@ def setup():
 
     acceptConnections()
 
+def ftp():
+    global IP_ADDRESS
 
-#------ Student Activity 1 Start---------------
+    authorizer = DummyAuthorizer()
+    authorizer.add_user("lftpd","lftpd",".",perm="elradfmw")
 
+    handler = FTPHandler
+    handler.authorizer = authorizer
+
+    ftp_server = FTPServer((IP_ADDRESS,21),handler)
+    ftp_server.serve_forever()
 
 setup_thread = Thread(target=setup)           #receiving multiple messages
 setup_thread.start()
 
 
-
-#------ Student Activity 1 End---------------
+ftp_thread = Thread(target=ftp)               #receiving multiple messages
+ftp_thread.start()
